@@ -93,6 +93,7 @@ export default function ChibiOrderForm() {
     clasp: "",
     charmColor: "",
   })
+  const [hairHighlightError, setHairHighlightError] = useState("")
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const color = e.target.value
@@ -114,11 +115,19 @@ export default function ChibiOrderForm() {
         ...formData,
         hairHighlights: formData.hairHighlights.filter((h) => !(h.type === type && h.position === position)),
       })
+      if (formData.hairHighlights.length - 1 <= 2) {
+        setHairHighlightError("")
+      }
     } else {
+      if (formData.hairHighlights.length >= 2) {
+        setHairHighlightError("You can select at most 2 boxes.")
+        return
+      }
       setFormData({
         ...formData,
         hairHighlights: [...formData.hairHighlights, { type, position }],
       })
+      setHairHighlightError("")
     }
   }
 
@@ -174,9 +183,15 @@ export default function ChibiOrderForm() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <h1 className="font-mono text-3xl md:text-5xl font-bold text-center mb-8 text-rose-900 text-balance">
+      <h1 className="font-mono text-3xl md:text-5xl font-bold text-center mb-2 text-rose-900 text-balance">
         YCH Chibi Commission Form
       </h1>
+      <p className="text-center font-mono text-rose-900 mb-6">
+        by{" "}
+        <a href="https://x.com/yuuepye" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">
+          yuuepye
+        </a>
+      </p>
 
       <form onSubmit={handleSubmit}>
         <div className="grid lg:grid-cols-2 gap-8">
@@ -195,14 +210,15 @@ export default function ChibiOrderForm() {
 
             {/* Hair Highlights Section */}
             <Card className="p-6 bg-white/80 backdrop-blur border-2 border-rose-200">
-              <Label className="text-lg font-mono font-semibold text-rose-900 mb-4 block">Hair Highlights</Label>
-              <div className="space-y-3">
+              <Label className="text-lg font-mono font-semibold text-rose-900 leading-none mb-0 block">Hair Highlights</Label>
+              <p className="text-xs font-mono text-rose-600 mt-0">Select up to 2 boxes total.</p>
+              <div className="space-y-2 mt-0.5">
                 {hairHighlights.map((highlight) => (
                   <div
                     key={highlight.id}
-                    className="flex items-center gap-4 p-2 rounded hover:bg-rose-50/50 transition-colors"
+                    className="flex items-center gap-2.5 p-1.5 rounded hover:bg-rose-50/50 transition-colors"
                   >
-                    <div className="relative w-12 h-12 flex-shrink-0">
+                    <div className="relative w-10 h-10 flex-shrink-0">
                       <Image
                         src={highlight.image || "/placeholder.svg"}
                         alt={highlight.label}
@@ -210,16 +226,16 @@ export default function ChibiOrderForm() {
                         className="object-contain"
                       />
                     </div>
-                    <span className="font-mono text-sm min-w-[80px] text-rose-800">{highlight.label}</span>
-                    <div className="flex gap-4">
-                      <label className="flex items-center gap-2 cursor-pointer">
+                    <span className="font-mono text-sm min-w-[72px] text-rose-800">{highlight.label}</span>
+                    <div className="flex gap-3">
+                      <label className="flex items-center gap-1.5 cursor-pointer">
                         <Checkbox
                           checked={formData.hairHighlights.some((h) => h.type === highlight.id && h.position === "L")}
                           onCheckedChange={() => handleHighlightToggle(highlight.id, "L")}
                         />
                         <span className="font-mono text-sm text-rose-700">L</span>
                       </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
+                      <label className="flex items-center gap-1.5 cursor-pointer">
                         <Checkbox
                           checked={formData.hairHighlights.some((h) => h.type === highlight.id && h.position === "R")}
                           onCheckedChange={() => handleHighlightToggle(highlight.id, "R")}
@@ -230,6 +246,7 @@ export default function ChibiOrderForm() {
                   </div>
                 ))}
               </div>
+              {hairHighlightError && <p className="text-sm font-mono text-rose-600 mt-2">{hairHighlightError}</p>}
             </Card>
           </div>
 
@@ -237,7 +254,7 @@ export default function ChibiOrderForm() {
           <div className="space-y-6">
             {/* Contact Info */}
             <Card className="p-6 bg-white/80 backdrop-blur border-2 border-rose-200">
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
                   <Label htmlFor="nickname" className="font-mono text-rose-900">
                     Nickname
@@ -255,26 +272,27 @@ export default function ChibiOrderForm() {
                 </div>
 
                 <div>
-                  <Label htmlFor="username" className="font-mono text-rose-900">
+                  <Label htmlFor="username" className="font-mono text-rose-900 block mb-0.5">
                     Username (X)
                   </Label>
+                  <p className="text-xs font-mono text-rose-600 my-0.5">Please make sure your DMs are open</p>
                   <Input
                     id="username"
                     name="username"
                     value={formData.username}
                     onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                    className="mt-1.5 font-mono border-rose-300 focus:border-rose-500"
+                    className="mt-0.5 font-mono border-rose-300 focus:border-rose-500"
                     placeholder="@username"
                     required
                   />
-                  <p className="text-xs font-mono text-rose-600 mt-1.5">Please make sure your DMs are open</p>
                   <ValidationError prefix="Username" field="username" errors={state.errors} />
                 </div>
 
                 <div>
-                  <Label htmlFor="characterName" className="font-mono text-rose-900">
+                  <Label htmlFor="characterName" className="font-mono text-rose-900 block mb-0.5">
                     Character Name
                   </Label>
+                  <p className="text-xs font-mono text-rose-600 my-0.5">Please write OC if the character is an OC</p>
                   <Input
                     id="characterName"
                     name="characterName"
@@ -285,11 +303,10 @@ export default function ChibiOrderForm() {
                         characterName: e.target.value,
                       })
                     }
-                    className="mt-1.5 font-mono border-rose-300 focus:border-rose-500"
+                    className="mt-0.5 font-mono border-rose-300 focus:border-rose-500"
                     placeholder="Character name"
                     required
                   />
-                  <p className="text-xs font-mono text-rose-600 mt-1.5">Please write OC if the character is an OC</p>
                   <ValidationError prefix="Character Name" field="characterName" errors={state.errors} />
                 </div>
 
@@ -308,7 +325,7 @@ export default function ChibiOrderForm() {
                       })
                     }
                     className="mt-1.5 font-mono border-rose-300 focus:border-rose-500"
-                    placeholder="Please paste a publicly accessible link"
+                    placeholder="Please enter a publicly accessible link"
                     type="url"
                     required
                   />
@@ -395,7 +412,7 @@ export default function ChibiOrderForm() {
                     value={formData.handPose}
                     onChange={(e) => setFormData({ ...formData, handPose: e.target.value })}
                     className="mt-1.5 font-mono border-rose-300 focus:border-rose-500 min-h-[120px]"
-                    placeholder="Describe the hand pose you want..."
+                    placeholder="Describe the hand pose you want"
                     required
                   />
                   <ValidationError prefix="Hand Pose" field="handPose" errors={state.errors} />
